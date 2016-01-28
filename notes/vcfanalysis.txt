@@ -1,0 +1,4 @@
+I'm trying to get vcftools to work on my computer so I can start playing around with it
+ - converting it to a csv, and getting into the binary form instead of the way it is now
+ - listing the reference allele and the alternate allele. 
+Just have to get vcftools working, then find that feature. 
