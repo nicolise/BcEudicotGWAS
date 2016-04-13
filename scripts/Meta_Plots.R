@@ -27,43 +27,74 @@ p + geom_violin(trim=T)+
 ##scatterplot by plant species
 names(MyData)
 attach(MyData)
-
-MyData$avgLS <- ave(MyData$Scale.LS, MyData$IsolateID)
 #add PlantNum as an integer sorted by mean lesion size
 library(plyr)
-FigDat <- ddply(MyData, c("PlantGeno", "IsolateID", "Domest", "Taxon", "avgLS"), summarise,
-                 mLS   = mean(Scale.LS))
-#"mean" is mean lesion size by plant genotype.
-MDmeans <- ddply(MyData, c("PlantGeno","Domest", "Taxon"), summarise, mean=mean(Scale.LS))
-#add TxMean to scale lesion size by taxon
-MDmeans$TxMean <- ave(MDmeans$mean, MDmeans$Taxon)
-MDmeans <- MDmeans[order(MDmeans$Taxon, MDmeans$Domest, MDmeans$mean),] 
-MDmeans$PlNum <- c(1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6)
-FigDat <- merge(FigDat, MDmeans[,c(1,4:6)], by="PlantGeno")
-FigDat <- dplyr::select(FigDat, PlOrder = mean, matches("."))
-FigDat$PlOrder <- as.numeric(FigDat$PlOrder)
+#1 value per plant:isolate combination
+FigDat <- ddply(MyData, c("PlantGeno", "IsolateID", "Domest", "Taxon"), summarise,
+                 meanBYall   = mean(Scale.LS))
+#1 value per isolate
+FigDat$meanBYiso <- ave(FigDat$meanBYall, FigDat$IsolateID, FUN = mean)
+#1 value per isolate, per taxon
+FigDat$meanBYisoTax <- ave(FigDat$meanBYiso, FigDat$Taxon, FUN = mean)
+#1 value per isolate, per species / domest
+FigDat$meanBYisoSp <- ave(FigDat$meanBYisoTax, FigDat$Domest, FUN = mean)
+#1 value per taxon to scale lesion size
+FigDat$meanBYtax <- ave(FigDat$meanBYall, FigDat$Taxon, FUN = mean)
+#add a vector of 1:6 per domest in order of meanBYplant
+MDmeans <- ddply(MyData, c("PlantGeno","Domest", "Taxon"), summarise, meanBYplant=mean(Scale.LS))
+MDmeans <- MDmeans[order(MDmeans$Taxon, MDmeans$Domest, MDmeans$meanBYplant),] 
+MDmeans$PlNum <- (rep(1:6, times=12, each=1))
+#combine DFs
+FigDat <- merge(FigDat, MDmeans[,c(1,4:5)], by="PlantGeno")
 library(ggplot2)
 attach(FigDat)
 names(FigDat)
 
-#scale mLs by Taxon
-FigDat$mLS <- (FigDat$mLS / FigDat$TxMean)
+#scale LS by Taxon
+FigDat$scaleLS <- (FigDat$meanBYall / FigDat$meanBYtax)
 
-#add a column of mmLS (mean of mean lesion size) per isolate
-#sort dataframe by mmLS 
-#then color by the new factor mmLS
-FigDat$mmLS <- ave(FigDat$mLS, FigDat$IsolateID)
+#draw the figure
 attach(FigDat)
-FigDat <- FigDat[order(mmLS),]
-ggplot(FigDat, aes(x = PlNum, y = mLS))+
+ggplot(FigDat, aes(x = PlNum, y = scaleLS))+
   geom_point()+
   theme_bw()+
-  geom_line(size=1, aes(color=factor(mmLS), group=factor(IsolateID)), show.legend=F)+
-  #scale_x_discrete(breaks=c("1","2","3", "4", "5", "6", "1", "2", "3", "4", "5", "6"),
-                   #labels=c("LA4345", "LA3008", "LA4355", "LA2706", "LA3475", "LA0410", "LA1547", "LA2093", "LA1684", "LA1589", "LA0480", "LA2176"))+
+  geom_line(size=1, aes(color=factor(meanBYiso), group=factor(IsolateID)), show.legend=F)+
   facet_grid(~Taxon*Domest, scales="fixed", space="free_x")+
-  theme(text = element_text(size=24), axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(text = element_text(size=18))+ #, axis.text.x = element_text(angle = 45, hjust = 1)
   labs(y=expression(Lesion ~ Area ~ (cm^{2})), x=element_blank())
-#+geom_smooth(aes(group = 2), size = 2, method = "lm", se = T)
+
+#draw a figure highlighting saprophytes
+#find 5 lowest lesion sizes
+sort(FigDat$meanBYiso, TRUE)
+hist(FigDat$meanBYiso, breaks=100)
+MyMins <- c(0.1658313, 0.2960654, 0.3719376, 0.4307290, 0.4507375)
+#Davis Navel, 
+sort(FigDat$meanBYiso, F)
+MyMaxs <- c(1.3252362, 1.2791752, 1.2661299, 1.2450447, 1.2349104)
+
+#and for scaled
+sort(FigDat$scaleLS, TRUE)
+
+#list isolates by mean 
+IsoVals <- FigDat[,c("IsolateID", "meanBYiso")]
+IsoVals <- unique(IsoVals)
+#LowLes is only lowest 5 isolates, HiLes is highest 5
+FigDat$LowLes <- FigDat$scaleLS
+FigDat$LowLes[FigDat$meanBYiso > 0.45074] <- NA
+FigDat$LowLes[FigDat$meanBYiso < 0.45072] <- NA
+FigDat$HiLes <- FigDat$scaleLS
+FigDat$HiLes[FigDat$meanBYiso < 1.245] <- NA
+FigDat$HiLes[FigDat$meanBYiso > 1.246] <- NA
+
+#dimensions: 20 by 2
+#draw grey figure
+ggplot(FigDat, aes(x = PlNum, y = scaleLS))+
+  theme_bw()+
+  geom_line(size=1, color = "grey54", aes(group=factor(IsolateID)), show.legend=F, alpha=0.4)+
+  geom_line(size=1, aes(x =  PlNum, y = HiLes, group=factor(IsolateID)), color = "black")+
+  facet_grid(~Taxon*Domest, scales="fixed", space="free_x")+
+  theme(text = element_text(size=18))+ #, axis.text.x = element_text(angle = 45, hjust = 1)
+  labs(y=expression(Lesion ~ Area ~ (cm^{2})), x=element_blank())
+
 #----------------------------------------------------------------
 
