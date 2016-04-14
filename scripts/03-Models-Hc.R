@@ -1,11 +1,11 @@
-#modeling for Glycine max
-#041216
+#modeling for Helianthus csomething
+#041316
 #-------------------------------------------------------------
 rm(list=ls())
 setwd("~/Projects/BcEudicotGWAS/data/MetaAnalysis")
 #-------------------------------------------------------------
 #load data
-ModDat <- read.csv("GmMetaDat.csv")
+ModDat <- read.csv("HcMetaDat.csv")
 
 names(ModDat)
 
@@ -22,17 +22,21 @@ qqp(ModDat$Scale.LS.t, "norm")
 #run the model
 library(lme4); library(car); library(lmerTest)
 
-#fails - model nearly unidentifiable
+
+#
+#full model fails
 #fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|Domest/PlantGeno/IndPlant), data = ModDat)
-#fails when dropping 1|Exp/Rep/Flat
-#plus when dropping 1|Exp/Rep too
+#still fails when drop 1|Exp/Rep/Flat
+#still fails when drop 1|Exp/Rep
+#and when drop 1|Domest/PlantGeno/IndPlant
 
 Sys.time()
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) , data = ModDat)
+#working model
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp), data = ModDat)
 Sys.time()
 
-sink(file='GmFullMod_041216.txt')
-print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) , data = ModDat)")
+sink(file='HcFullMod_041316.txt')
+print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp), data = ModDat)")
 Sys.time()
 rand(fullmod)
 Anova(fullmod, type=2)
@@ -48,10 +52,10 @@ attach(ModDat)
 out <- split( ModDat , f = ModDat$PlantGeno)
 head(out[[1]]) #100 elements, max. 69 obs per isolate
 
-#fails when (1|Exp/Rep)
+#fails when including 1|Exp/Rep
 
 #Using a for loop, iterate over the list of data frames in out[[]]
-sink(file="GmLSMeans041316.txt")
+sink(file="HcLSMeans041316.txt")
 for (i in c(1:12)) {
   print(unique(out[[i]]$PlantGeno))
   #this one works
