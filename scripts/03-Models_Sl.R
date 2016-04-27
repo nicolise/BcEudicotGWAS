@@ -21,20 +21,24 @@ qqp(ModDat$Scale.LS.t, "norm")
 #---------------------------------------------------------------
 #run the model
 library(lme4); library(car); library(lmerTest)
-
-Sys.time()
 #this model worked in my original BcSolGWAS analysis
 #fullmod <- lmer(Scale.LS ~ Igeno + Species/PlGenoNm + Igeno:Species/PlGenoNm + Igeno:Species + ExpBlock + (1|ExpBlock/AgFlat) + (1|IndPlant) + AorB , data = ModDat)
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep/Flat), + (1|Exp/Rep) + (1|Species/PlGenoNm/IndPlant) + (1|Species/PlGenoNm/IndPlant/AorB), data = ModDat)
-sink(file='SlFullMod_041816.txt')
-print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep/Flat), + (1|Exp/Rep) + (1|Species/PlGenoNm/IndPlant) + (1|Species/PlGenoNm/IndPlant/AorB), data = ModDat)")
+
+#this gives weird error (object 'Exp' not found)
+#fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep/Flat), + (1|Exp/Rep) + (1|Species/PlGenoNm/IndPlant) + (1|Species/PlGenoNm/IndPlant/AorB), data = ModDat)
+
+Sys.time()
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp)+ (1|Exp/Rep), data = ModDat)
+Sys.time()
+
+sink(file='SlFullMod_041916_01.txt')
+print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep/Flat), + (1|Exp/Rep), data = ModDat)")
 Sys.time()
 rand(fullmod)
 Anova(fullmod, type=2)
 anova(fullmod)
 Sys.time()
 sink()
-
 
 #lsmeans
 #run model per isolate WITHIN each plant genotype
