@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------
 rm(list=ls())
 setwd("~/Projects/BcEudicotGWAS/data/MetaAnalysis")
+setwd("~/Documents/GitRepos/BcEudicotGWAS/data")
 
 SlModDat <- read.csv("SlMetaDat.csv")
 BrModDat <- read.csv("BrMetaDat.csv")

@@ -3,6 +3,7 @@
 #-------------------------------------------------------------
 rm(list=ls())
 setwd("~/Projects/BcEudicotGWAS/data/MetaAnalysis")
+setwd("~/Documents/GitRepos/BcEudicotGWAS/data")
 #-------------------------------------------------------------
 #load data
 ModDat <- read.csv("BrMetaDat.csv")
@@ -19,20 +20,27 @@ ModDat$Scale.LS.t <- ModDat$Scale.LS + 1
 qqp(ModDat$Scale.LS.t, "norm")
 
 #---------------------------------------------------------------
+#try removing isolates missing from one experiment
+BrSumm <- as.data.frame(with(ModDat, table(IsolateID,Rep)))
+#missing Exps: 01.05.22 (1), 02.04.21 (1), Geranium (2), Navel (2)
+OgDat <- ModDat
+ModDat <- subset(ModDat, IsolateID != c("01.05.22","02.04.21","Geranium","Navel"))
+
 #run the model
 library(lme4); library(car); library(lmerTest)
 Sys.time()
-sink(file='BrFullMod_040816.txt')
+sink(file='BrFullMod_042716.txt')
 print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)")
 
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat) #this one does not give p values
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat) 
+#this one does not give p values
 #dropping 1|IndPlant and 1|Exp/Rep/Flat and 1|Exp/Rep doesn't fix it either. 
 
 #working model
 #do get p-vals, BrFullMod_041116.txt
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp), data = ModDat) 
+##fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp), data = ModDat) 
 
-sink(file='BrFullMod_041116b.txt')
+##sink(file='BrFullMod_041116b.txt')
 Sys.time()
 rand(fullmod)
 Anova(fullmod, type=2)
