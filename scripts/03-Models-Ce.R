@@ -19,6 +19,11 @@ ModDat$Scale.LS.t <- ModDat$Scale.LS + 1
 qqp(ModDat$Scale.LS.t, "norm")
 
 #---------------------------------------------------------------
+#remove isolates missing from one exp
+CeSumm <- as.data.frame(with(ModDat, table(IsolateID,Rep)))
+#missing Exps: 94.1 (1), UKRazz (1), 01.04.15 (2), Gallo1 (2)
+OgDat <- ModDat
+ModDat <- subset(ModDat, IsolateID != c("94.1", "UKRazz", "01.04.15", "Gallo1"))
 #run the model
 library(lme4); library(car); library(lmerTest)
 #fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)
