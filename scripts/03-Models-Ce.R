@@ -26,7 +26,7 @@ OgDat <- ModDat
 ModDat <- subset(ModDat, IsolateID != c("94.1", "UKRazz", "01.04.15", "Gallo1"))
 #run the model
 library(lme4); library(car); library(lmerTest)
-#fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)
 #fails to converge with 1|Exp/Rep/Flat
 
 #fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Domest/PlantGeno/IndPlant), data = ModDat) 
@@ -35,10 +35,10 @@ library(lme4); library(car); library(lmerTest)
 Sys.time()
 #working model
 #p-vals in CeFullMod_041116.txt
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|IndPlant), data = ModDat)
+##fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|IndPlant), data = ModDat)
 
-sink(file='CeFullMod_041116.txt')
-print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|IndPlant), data = ModDat)")
+sink(file='CeFullMod_042716.txt')
+print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)")
 Sys.time()
 rand(fullmod)
 Anova(fullmod, type=2)
