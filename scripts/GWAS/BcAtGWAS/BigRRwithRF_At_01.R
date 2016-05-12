@@ -39,19 +39,10 @@ SNPs$Chr.Base <- do.call(paste, c(SNPs[c("X.CHROM","POS")], sep="."))
 
 #Rachel's attempt------------------=====================================
 
-rownames(SNPs) <- SNPs[,95] #set the new column of chrom.base as rownames - this could maybe be written as: rownames(SNPs) <- SNPs$Chr.Base?
-SNPs <- SNPs[,4:94] #take out first three cols (X.CHROM, POS, REF) and new last col (Chr.Base). dim(SNPs) should now be [345485, 91], colnames(SNPs) are all Bc Isolates, rownames(SNPs) are all Chr.Base
+rownames(SNPs) <- SNPs[,93] #set the new column of chrom.base as rownames - this could maybe be written as: rownames(SNPs) <- SNPs$Chr.Base?
+SNPs <- SNPs[,4:92] #take out first three cols (X.CHROM, POS, REF) and new last col (Chr.Base). dim(SNPs) should now be [345485, 91], colnames(SNPs) are all Bc Isolates, rownames(SNPs) are all Chr.Base
 
 #Rachel's attempt ----FIN-----============================================
-
-#--Rachel commented out--SNPs <- SNPs[,-1]
-#make SNPs numeric
-# myconvert <- colnames(SNPs[1:91])
-# for (i in myconvert)
-#   {
-#   SNPs[[i]] <- as.numeric(SNPs[[i]])
-# }
-
 
 #what does this do? 
 #loads SNP dataframe as a matrix?
@@ -61,9 +52,13 @@ for(i in 1:dim(SNPs)[1]) {
   SNPs[i,] <- as.numeric(SNPs[i,])
 }
 
-
+#made all LSMeans values absolute values (some <0)
 Phenos <- read.csv("data/BcAtGWAS/03_bigRRinput/At_Pheno_bigRR.csv", row.names = 1)
+#remove duplicate row 77 (KGB1 duplicate)
+Phenos <- Phenos[-77,]
 dat <- as.data.frame((Phenos[,3:16]))  #INSERT PHENOTYPE COLUMNS HERE
+#skip phenos 3 (done) and 4,5 (error)
+#dat is 89 entries
 
 outpt.BLUP <- colnames(SNPs)
 outpt.HEM <- colnames(SNPs)
@@ -71,6 +66,7 @@ thresh.BLUP <- list("0.95Thresh" = NA, "0.975Thresh" = NA, "0.99Thresh" = NA, "0
 thresh.HEM <- list("0.95Thresh" = NA, "0.975Thresh" = NA, "0.99Thresh" = NA, "0.999Thresh" = NA)
 
 #Calculate BLUP and HEMs for all phenotypes
+Sys.time()
 for(i in 1:dim(dat)[2]) { #i will be each isolate
   print(colnames(dat)[i])
   MyX <- matrix(1, dim(dat)[1], 1)
@@ -125,7 +121,7 @@ thresh.HEM$"0.999Thresh" <- c("0.999 Thresh", thresh.HEM$"0.999Thresh")
 #Write results to output
 write.csv(rbind(thresh.BLUP$"0.95Thresh",thresh.BLUP$"0.975Thresh",thresh.BLUP$"0.99Thresh",thresh.BLUP$"0.999Thresh",outpt.BLUP),"AthalianaLesion.BLUP.csv")
 write.csv(rbind(thresh.HEM$"0.95Thresh",thresh.HEM$"0.975Thresh",thresh.HEM$"0.99Thresh",thresh.HEM$"0.999Thresh",outpt.HEM),"AthalianaLesion.HEM.csv")
-
+Sys.time()
 ### can stop here
 
 # #This part failed for me -- NES
