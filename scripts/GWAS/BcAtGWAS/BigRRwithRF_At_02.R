@@ -4,7 +4,7 @@
 #---------------------------------------------------------------
 
 rm(list=ls())
-setwd("~/Documents/GitRepos/BcSolGWAS/")
+setwd("~/Documents/GitRepos/BcEudicotGWAS/")
 ############################################################################
 ###Plotting the HEM results
 
@@ -13,30 +13,30 @@ library(ggplot2)
 library(grid)
 
 #Import data (reorganized from script ReformatBigRRouts.R)
-HEM.plotdata <- read.csv("data/GWAS_files/04_bigRRoutput/Sl_LesionSize.HEM.PlotFormat.csv")
+HEM.plotdata <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_Col0phenos.HEM.PlotFormat.csv")
 
 HEM.plotdata$Pos <- as.character(HEM.plotdata$Pos)#ensure that position data is not in scientific notation
 HEM.plotdata <- HEM.plotdata[-c(1:2)]
 
 #get threshhold values 
-HEM.thresh <- read.csv("data/GWAS_files/04_bigRRoutput/Sl_LesionSize.HEM.Thresh.csv")
+HEM.thresh <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_Col0phenos.HEM.Thresh.csv")
 HEM.thresh <- HEM.thresh[,-c(1:2)]
 TH99 <- HEM.thresh[3,]
-TH99_LA0410 <- as.numeric(TH99[2])
-TH99_LA0480 <- as.numeric(TH99[3])
-TH99_LA1547 <- as.numeric(TH99[4])
-TH99_LA1589 <- as.numeric(TH99[5])
-TH99_LA1684 <- as.numeric(TH99[6])
-TH99_LA2093 <- as.numeric(TH99[7])
-TH99_LA2176 <- as.numeric(TH99[8])
-TH99_LA2706 <- as.numeric(TH99[9])
-TH99_LA3008 <- as.numeric(TH99[10])
-TH99_LA3475 <- as.numeric(TH99[11])
-TH99_LA4345 <- as.numeric(TH99[12])
-TH99_LA4355 <- as.numeric(TH99[13])
+TH99_Col0.Cam <- as.numeric(TH99[2])
+TH99_ <- as.numeric(TH99[3])
+TH99_ <- as.numeric(TH99[4])
+TH99_ <- as.numeric(TH99[5])
+TH99_ <- as.numeric(TH99[6])
+TH99_ <- as.numeric(TH99[7])
+TH99_ <- as.numeric(TH99[8])
+TH99_ <- as.numeric(TH99[9])
+TH99_ <- as.numeric(TH99[10])
+TH99_ <- as.numeric(TH99[11])
+TH99_ <- as.numeric(TH99[12])
+TH99_ <- as.numeric(TH99[13])
 
 TH999 <- HEM.thresh[4,]
-TH999_LA0410 <- as.numeric(TH999[2])
+TH999_Col0.Cam <- as.numeric(TH999[2])
 TH999_LA0480 <- as.numeric(TH999[3])
 TH999_LA1547 <- as.numeric(TH999[4])
 TH999_LA1589 <- as.numeric(TH999[5])
@@ -50,7 +50,7 @@ TH999_LA4345 <- as.numeric(TH999[12])
 TH999_LA4355 <- as.numeric(TH999[13])
 
 TH95 <- HEM.thresh[1,]
-TH95_LA0410 <- as.numeric(TH95[2])
+TH95_Col0.Cam <- as.numeric(TH95[2])
 TH95_LA0480 <- as.numeric(TH95[3])
 TH95_LA1547 <- as.numeric(TH95[4])
 TH95_LA1589 <- as.numeric(TH95[5])
@@ -91,21 +91,18 @@ for (i in unique(HEM.plotdata$Chrom)) {
 }
 ticklim=c(min(HEM.plotdata$Index),max(HEM.plotdata$Index))
 
-#make plots for each phenotype
-jpeg("plots/Sl_LesionSize_LA0410.ManhattanPlot.jpg")
-qplot(Index,abs(LA0410), data=HEM.plotdata, ylab="SNP Effect Estimate" , 
-      main = "LesionSize_LA0410", colour=factor(Chrom)) +
- geom_hline(yintercept=TH99_LA0410) +
-  geom_text(aes(0,TH99_LA0410, label = ".99 Threshold", vjust = 1.5, hjust = .05), col = "black") +
-geom_hline(yintercept=TH95_LA0410, colour = "blue") +
-  geom_text(aes(0,TH95_LA0410, label = ".95 Threshold", vjust = 1.5, hjust = .05), col = "blue")
-dev.off()
+hist(HEM.plotdata$Index)
 
-jpeg("plots/Sl_LesionSize_LA0410.ManhattanPlot_999.jpg")
-qplot(Index,abs(LA0410), data=HEM.plotdata, ylab="SNP Effect Estimate" , 
-      main = "LesionSize_LA0410", colour=factor(Chrom)) +
-  geom_hline(yintercept=TH999_LA0410) +
-  geom_text(aes(0,TH999_LA0410, label = ".999 Threshold", vjust = 1.5, hjust = .05), col = "black")
+#make plots for each phenotype
+jpeg("plots/AtCol0_Cam.ManhattanPlot.jpg")
+qplot(Index,abs(Col0.Cam.HEM), data=HEM.plotdata, ylab="SNP Effect Estimate" , 
+      main = "Camalexin_AtCol0", colour=factor(Chrom)) +
+  geom_hline(yintercept=TH999_Col0.Cam) +
+  geom_text(aes(0,TH999_Col0.Cam, label = ".999 Threshold", vjust = 1.5, hjust = .05), col = "black") +
+ geom_hline(yintercept=TH99_Col0.Cam) +
+  geom_text(aes(0,TH99_Col0.Cam, label = ".99 Threshold", vjust = 1.5, hjust = .05), col = "black") +
+geom_hline(yintercept=TH95_Col0.Cam, colour = "blue") +
+  geom_text(aes(0,TH95_Col0.Cam, label = ".95 Threshold", vjust = 1.5, hjust = .05), col = "blue")
 dev.off()
 
 #how many SNPs are above a certain threshhold?

@@ -42,6 +42,10 @@ SNPs$Chr.Base <- do.call(paste, c(SNPs[c("X.CHROM","POS")], sep="."))
 rownames(SNPs) <- SNPs[,93] #set the new column of chrom.base as rownames - this could maybe be written as: rownames(SNPs) <- SNPs$Chr.Base?
 SNPs <- SNPs[,4:92] #take out first three cols (X.CHROM, POS, REF) and new last col (Chr.Base). dim(SNPs) should now be [345485, 91], colnames(SNPs) are all Bc Isolates, rownames(SNPs) are all Chr.Base
 
+#troubleshoot: try removing X1.02.19 because it wasn't in tomato GWAS
+#SNPs <- SNPs[,-16]
+
+SNPdf <- SNPs
 #Rachel's attempt ----FIN-----============================================
 
 #what does this do? 
@@ -52,13 +56,38 @@ for(i in 1:dim(SNPs)[1]) {
   SNPs[i,] <- as.numeric(SNPs[i,])
 }
 
-#made all LSMeans values absolute values (some <0)
 Phenos <- read.csv("data/BcAtGWAS/03_bigRRinput/At_Pheno_bigRR.csv", row.names = 1)
+#note: in data frame replaced one NA (npr1.Cam, 01.02.02) with 7.91 (average for npr1)
+
 #remove duplicate row 77 (KGB1 duplicate)
 Phenos <- Phenos[-77,]
-dat <- as.data.frame((Phenos[,3:16]))  #INSERT PHENOTYPE COLUMNS HERE
-#skip phenos 3 (done) and 4,5 (error)
-#dat is 89 entries
+
+#add constant to remove negative values
+Phenos$Col0.Cam <- Phenos$Col0.Cam + 9
+Phenos$anac055.Cam <- Phenos$anac055.Cam + 4
+Phenos$coi1.Cam <- Phenos$coi1.Cam + 2
+Phenos$tga3.Cam <- Phenos$tga3.Cam + 3
+
+#try standardizing Lesion Size Data (large values ~ 1000s)
+Phenos$Col0.Les.s <- (Phenos$Col0.Les - mean(Phenos$Col0.Les))/sd(Phenos$Col0.Les) + 2
+Phenos$anac055.Les.s <- (Phenos$anac055.Les - mean(Phenos$anac055.Les))/sd(Phenos$anac055.Les) +3
+Phenos$coi1.Les.s <- (Phenos$coi1.Les - mean(Phenos$coi1.Les))/sd(Phenos$coi1.Les) +3
+Phenos$npr1.Les.s <- (Phenos$npr1.Les - mean(Phenos$npr1.Les))/sd(Phenos$npr1.Les) +3
+Phenos$pad3.Les.s <- (Phenos$pad3.Les - mean(Phenos$pad3.Les))/sd(Phenos$pad3.Les) +3
+Phenos$tga3.Les.s <- (Phenos$tga3.Les - mean(Phenos$tga3.Les))/sd(Phenos$coi1.Les) +2
+
+#only keep columns with standardized phenotypes
+attach(Phenos)
+Phenos <- Phenos[,c("Rename","Col0.Cam","Col0.Les.s","Col0.AT3G26830","Col0.AT2G30770" ,"Col.0AT4G30530","anac055.Cam","anac055.Les.s","coi1.Cam","coi1.Les.s","npr1.Cam","npr1.Les.s","tga3.Cam","tga3.Les.s")]
+
+#troubleshoot: try removing X1.02.19 since it wasn't used in tomato GWAS
+#Phenos <- Phenos[-16,]
+
+dat <- as.data.frame((Phenos[,2:14]))  #INSERT PHENOTYPE COLUMNS HERE
+write.csv(dat, "mydata.csv")
+dat <- read.csv("mydata.csv")
+dat <- dat[,-1]
+
 
 outpt.BLUP <- colnames(SNPs)
 outpt.HEM <- colnames(SNPs)
