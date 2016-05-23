@@ -10,7 +10,7 @@ setwd("~/Documents/GitRepos/BcEudicotGWAS/")
 # This makes the bigRR_update run through the GPU
 # You need to do this first to mask the native 'bigRR_update' in the bigRR package
 # one alternative to family = gaussian(link = identity) is family = poisson(link = log)
-bigRR_update <- function (obj, Z, family = poisson(link = log), tol.err = 1e-06, 
+bigRR_update <- function (obj, Z, family = gaussian(link = identity), tol.err = 1e-06, 
                           tol.conv = 1e-08) 
 {
   w <- as.numeric(obj$u^2/(1 - obj$leverage))
@@ -83,7 +83,10 @@ Phenos <- Phenos[,c("Rename","Col0.Cam","Col0.Les.s","Col0.AT3G26830","Col0.AT2G
 #troubleshoot: try removing X1.02.19 since it wasn't used in tomato GWAS
 #Phenos <- Phenos[-16,]
 
-dat <- as.data.frame((Phenos[,2:14]))  #INSERT PHENOTYPE COLUMNS HERE
+#tried skipping first few phenos (6:14)
+#complete is: 2:14
+#error without permutations for "Col0.AT2G30770" (5)
+dat <- as.data.frame((Phenos[,c(2:4,6:14)]))  #INSERT PHENOTYPE COLUMNS HERE
 write.csv(dat, "mydata.csv")
 dat <- read.csv("mydata.csv")
 dat <- dat[,-1]
@@ -97,7 +100,7 @@ thresh.HEM <- list("0.95Thresh" = NA, "0.975Thresh" = NA, "0.99Thresh" = NA, "0.
 #Calculate BLUP and HEMs for all phenotypes
 Sys.time()
 #should be for (i in 1:dim(dat)[2])  but only trying with 1:3
-for(i in 1:3) { #i will be each plant genotype
+for(i in 1:dim(dat)[2]) { #i will be each plant genotype
   print(colnames(dat)[i])
   MyX <- matrix(1, dim(dat)[1], 1)
   
@@ -112,11 +115,10 @@ for(i in 1:3) { #i will be each plant genotype
   ##perm.u.BLUP <- vector()
   perm.u.HEM <- vector()
   #should be p in 1:1000
-  for(p in 1:3) {  
+  for(p in 1:1000) {  
     if(p %% 10 == 0) {print(paste("Thresh sample:", p, "--", Sys.time()))}
-    ##temp.Pheno <- sample(dat[,i], length(dat[,i]), replace = FALSE) ## skip to troubleshoot
-    ## actual line:     print(try(temp.BLUP  <- bigRR(y = temp.Pheno, X = MyX, Z = SNPs, GPU = TRUE),silent = TRUE))
-    print(try(temp.BLUP  <- bigRR(y = dat[,i], X = MyX, Z = SNPs, GPU = TRUE),silent = TRUE))
+    temp.Pheno <- sample(dat[,i], length(dat[,i]), replace = FALSE) ## skip to troubleshoot
+    print(try(temp.BLUP  <- bigRR(y = temp.Pheno, X = MyX, Z = SNPs, GPU = TRUE),silent = TRUE))
     #works up to here with 3 i's and 3 p's
     try(temp.HEM <- bigRR_update(temp.BLUP, SNPs)) #REF change- was bigRR_update(Pheno.BLUP.result...
     ##perm.u.BLUP <- c(perm.u.BLUP, temp.BLUP$u) #REF change- ...c(perm.u.HEM...)
@@ -128,10 +130,10 @@ for(i in 1:3) { #i will be each plant genotype
   ##thresh.BLUP$"0.975Thresh"[i] <- quantile(perm.u.BLUP,0.975)
   ##thresh.BLUP$"0.99Thresh"[i] <- quantile(perm.u.BLUP,0.99)
   ##thresh.BLUP$"0.999Thresh"[i] <- quantile(perm.u.BLUP,0.999)
-  thresh.HEM$"0.95Thresh"[i] <- quantile(perm.u.HEM,0.95)
-  thresh.HEM$"0.975Thresh"[i] <- quantile(perm.u.HEM,0.975)
-  thresh.HEM$"0.99Thresh"[i] <- quantile(perm.u.HEM,0.99)
-  thresh.HEM$"0.999Thresh"[i] <- quantile(perm.u.HEM,0.999)
+  thresh.HEM$"0.95Thresh"[i] <- quantile(abs(perm.u.HEM),0.95)
+  thresh.HEM$"0.975Thresh"[i] <- quantile(abs(perm.u.HEM),0.975)
+  thresh.HEM$"0.99Thresh"[i] <- quantile(abs(perm.u.HEM),0.99)
+  thresh.HEM$"0.999Thresh"[i] <- quantile(abs(perm.u.HEM),0.999)
   ##colnames(outpt.BLUP)[i+1] <- paste(colnames(dat)[i],"BLUP",sep=".")
   colnames(outpt.HEM)[i+1] <- paste(colnames(dat)[i],"HEM",sep=".")
 }
@@ -153,8 +155,13 @@ thresh.HEM$"0.999Thresh" <- c("0.999 Thresh", thresh.HEM$"0.999Thresh")
 
 #Write results to output
 ##write.csv(rbind(thresh.BLUP$"0.95Thresh",thresh.BLUP$"0.975Thresh",thresh.BLUP$"0.99Thresh",thresh.BLUP$"0.999Thresh",outpt.BLUP),"AthalianaLesion.BLUP.csv")
-write.csv(rbind(thresh.HEM$"0.95Thresh",thresh.HEM$"0.975Thresh",thresh.HEM$"0.99Thresh",thresh.HEM$"0.999Thresh",outpt.HEM),"AthalianaLesion.HEM.csv")
+write.csv(rbind(thresh.HEM$"0.95Thresh",thresh.HEM$"0.975Thresh",thresh.HEM$"0.99Thresh",thresh.HEM$"0.999Thresh",outpt.HEM),"data/BcAtGWAS/04_bigRRoutput/AthalianaLesion.HEM.csv")
 Sys.time()
+
+#write.csv(outpt.HEM,"data/BcAtGWAS/04_bigRRoutput/Troubleshoot/AthalianaLesion_2.HEM.csv")
+Sys.time()
+
+
 ### can stop here
 
 # #This part failed for me -- NES
