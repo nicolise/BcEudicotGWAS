@@ -26,26 +26,33 @@ OgDat <- ModDat
 ModDat <- subset(ModDat, IsolateID != c("94.1", "UKRazz", "01.04.15", "Gallo1"))
 #run the model
 library(lme4); library(car); library(lmerTest)
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)
+# fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)
 #fails to converge with 1|Exp/Rep/Flat
 
 #fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Domest/PlantGeno/IndPlant), data = ModDat) 
 #fails to converge
 
-Sys.time()
 #working model
 #p-vals in CeFullMod_041116.txt
 ##fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|IndPlant), data = ModDat)
 
-sink(file='CeFullMod_042716.txt')
-print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)")
+#but, it does not make any sense to include 1|IndPlant without nesting under Domest/PlantGeno so--- removing it!
+#p-vals in CeFullMod_060416.txt
+#in dataframe with isolates dropped: failes with 1|exp/rep/flat and 1|domes/plantgeno/indplant
+#also fails to converge with 1|exp/rep and 1|domest/plantgeno/indplant
+#final working model below (06/04)
+Sys.time()
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)
+
+Sys.time()
+sink(file='CeFullMod_060416.txt')
+print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)")
 Sys.time()
 rand(fullmod)
 Anova(fullmod, type=2)
 anova(fullmod)
 Sys.time()
 sink()
-
 
 #lsmeans
 #run model per isolate WITHIN each plant genotype

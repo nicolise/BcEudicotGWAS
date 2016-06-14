@@ -1,11 +1,11 @@
-#modeling for Cichorium intybus
-#041216
+#modeling for Helianthus annuus
+#041316
 #-------------------------------------------------------------
 rm(list=ls())
-setwd("~/Projects/BcEudicotGWAS/data/MetaAnalysis")
+setwd("~/Projects/BcEudicotGWAS/")
 #-------------------------------------------------------------
 #load data
-ModDat <- read.csv("CiMetaDat.csv")
+ModDat <- read.csv("data/MetaAnalysis/HaMetaDat.csv")
 
 names(ModDat)
 
@@ -20,25 +20,26 @@ qqp(ModDat$Scale.LS.t, "norm")
 
 #---------------------------------------------------------------
 #try removing isolates missing from one experiment
-CiSumm <- as.data.frame(with(ModDat, table(IsolateID,Exp)))
-#missing Exps: 2.04.21 (1), 1.05.22 (1), Geranium (2), Navel (2)
+HaSumm <- as.data.frame(with(ModDat, table(IsolateID,Exp)))
+#missing Exps: 1.05.04 (1), KGB1 (2)
 OgDat <- ModDat
-ModDat <- subset(ModDat, IsolateID != c("01.05.22","02.04.21","Geranium","Navel"))
+#do separately due to error
+ModDat <- subset(ModDat, IsolateID != ("1.05.04"))
+ModDat <- subset(ModDat, IsolateID != ("KGB1"))
 
 #run the model
 library(lme4); library(car); library(lmerTest)
 
-#rerunning with isolates w/ missing experiments removed. 06/05/16
-#fails to converge
-#fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|Domest/PlantGeno/IndPlant), data = ModDat)
-#unable to evaluate scaled gradient/ fails to converge when you remove just 1|Exp/Rep/Flat
+#this one fails
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|Domest/PlantGeno/IndPlant), data = ModDat)
+#this too
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Domest/PlantGeno/IndPlant), data = ModDat)
 
-#working model for isolates minus those with missing exps
 Sys.time()
-#removed indplant
+#model is nearly unidentifiable
 fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)
 Sys.time()
-sink(file='CiFullMod_060516b.txt')
+sink(file='output/ModelOutputs/HcFullMod_060716a.txt')
 print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)")
 Sys.time()
 rand(fullmod)
@@ -55,14 +56,14 @@ attach(ModDat)
 out <- split( ModDat , f = ModDat$PlantGeno)
 head(out[[1]]) #100 elements, max. 69 obs per isolate
 
+#fails when including 1|Exp/Rep
+
 #Using a for loop, iterate over the list of data frames in out[[]]
-#fails when including exp/rep
-sink(file="output/ModelOutputs/CiLSMeans_060616.txt")
-print("Lesion.lm <- lmer(Scale.LS ~ IsolateID + (1|Exp), data=out[[i]])")
+sink(file="output/ModelOutputs/HaLSMeans061416.txt")
 for (i in c(1:12)) {
   print(unique(out[[i]]$PlantGeno))
   #this one works
-  Lesion.lm <- lmer(Scale.LS ~ IsolateID + (1|Exp), data=out[[i]])
+  Lesion.lm <- lmer(Scale.LS ~ IsolateID + (1|Exp) + (1|IndPlant) + (1|Exp:IsolateID), data=out[[i]])
   Lesion.lsm <- lsmeans(Lesion.lm, "IsolateID")
   print(Lesion.lsm)
 }

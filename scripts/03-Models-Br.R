@@ -2,11 +2,11 @@
 #040816
 #-------------------------------------------------------------
 rm(list=ls())
-setwd("~/Projects/BcEudicotGWAS/data/MetaAnalysis")
+setwd("~/Projects/BcEudicotGWAS/")
 setwd("~/Documents/GitRepos/BcEudicotGWAS/data")
 #-------------------------------------------------------------
 #load data
-ModDat <- read.csv("BrMetaDat.csv")
+ModDat <- read.csv("data/MetaAnalysis/BrMetaDat.csv")
 
 names(ModDat)
 
@@ -28,19 +28,22 @@ ModDat <- subset(ModDat, IsolateID != c("01.05.22","02.04.21","Geranium","Navel"
 
 #run the model
 library(lme4); library(car); library(lmerTest)
-Sys.time()
-sink(file='BrFullMod_042716.txt')
-print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat)")
 
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|IndPlant), data = ModDat) 
-#this one does not give p values
-#dropping 1|IndPlant and 1|Exp/Rep/Flat and 1|Exp/Rep doesn't fix it either. 
-
-#working model
+#previous working model (all isolates)
 #do get p-vals, BrFullMod_041116.txt
 ##fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp), data = ModDat) 
 
-##sink(file='BrFullMod_041116b.txt')
+#fails to converge:
+#fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|Domest/PlantGeno/IndPlant), data = ModDat) 
+#this also fails (dropped flat)
+#fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Domest/PlantGeno/IndPlant), data = ModDat) 
+
+#RERAN THIS 06/07/16
+#working model - without indplant:
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat) 
+Sys.time()
+sink(file='output/ModelOutputs/BrFullMod_060716.txt')
+print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)")
 Sys.time()
 rand(fullmod)
 Anova(fullmod, type=2)
@@ -57,9 +60,10 @@ head(out[[1]]) #100 elements, max. 69 obs per isolate
 
 #Using a for loop, iterate over the list of data frames in out[[]]
 #adding XX: error
-#fails at  PI.347594 (plant 3) when including exp/rep/flat
-#with 1|exp/rep, PI.508409 fails (plant 5)
-sink(file="LSMeans041116.txt")
+#with 1|exp/rep and 1|IndPlant, fails
+#fails to converge with just 1|exp/rep
+#works with or without 1|IndPlant
+sink(file="output/ModelOutputs/LSMeans060716.txt")
 for (i in c(1:12)) {
   print(unique(out[[i]]$PlantGeno))
   Lesion.lm <- lmer(Scale.LS ~ IsolateID + (1|Exp), data=out[[i]])
