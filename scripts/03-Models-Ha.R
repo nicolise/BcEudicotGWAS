@@ -36,15 +36,27 @@ fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/Plant
 fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Domest/PlantGeno/IndPlant), data = ModDat)
 
 Sys.time()
-#model is nearly unidentifiable
-fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)
+sink(file='output/ModelOutputs/HaFullMod_061416.txt')
+#trying a few
+#this fails to converge
+fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp:IsolateID) + (1|Exp/Domest/PlantGeno), data = ModDat)
+#this fails to converge
+fullmod2 <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp:IsolateID) + (1|Exp/Domest/PlantGeno), data = ModDat)
+#this fails to converge
+fullmod3 <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp:IsolateID) + (1|Exp/Domest/PlantGeno) + (1|Domest/PlantGeno/IndPlant), data = ModDat)
+#this one works, but fails to converge when calculating random effects
+fullmod4 <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat) + (1|Exp:IsolateID) + (1|Exp/Domest/PlantGeno), data = ModDat)
+
+fullmod5 <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) +  (1|Exp:IsolateID) + (1|Exp:Domest), data = ModDat)
+
+#model fails to converge when calculating random effects?
 Sys.time()
-sink(file='output/ModelOutputs/HcFullMod_060716a.txt')
-print("fullmod <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) + (1|Exp/Rep) + (1|Exp/Rep/Flat), data = ModDat)")
+sink(file='output/ModelOutputs/HaFullMod_061716.txt')
+print("fullmod5 <- lmer(Scale.LS ~ IsolateID + Domest/PlantGeno + IsolateID:Domest/PlantGeno + IsolateID:Domest + (1|Exp) +  (1|Exp:IsolateID) + (1|Exp:Domest), data = ModDat)")
 Sys.time()
-rand(fullmod)
-Anova(fullmod, type=2)
-anova(fullmod)
+rand(fullmod5)
+Anova(fullmod5, type=2)
+anova(fullmod5)
 Sys.time()
 sink()
 
@@ -59,12 +71,24 @@ head(out[[1]]) #100 elements, max. 69 obs per isolate
 #fails when including 1|Exp/Rep
 
 #Using a for loop, iterate over the list of data frames in out[[]]
-sink(file="output/ModelOutputs/HaLSMeans061416.txt")
+d = NULL
+library(data.table)
 for (i in c(1:12)) {
   print(unique(out[[i]]$PlantGeno))
   #this one works
   Lesion.lm <- lmer(Scale.LS ~ IsolateID + (1|Exp) + (1|IndPlant) + (1|Exp:IsolateID), data=out[[i]])
   Lesion.lsm <- lsmeans(Lesion.lm, "IsolateID")
-  print(Lesion.lsm)
+  df <- as.data.frame(print(Lesion.lsm))
+  setDT(df, keep.rownames = TRUE)[]
+  df$Plant <- unique(out[[i]]$PlantGeno)
+  d = rbind(d, df)
 }
-sink()
+write.csv(d, "output/ModelOutputs/HaLSMeans_062016.csv")
+
+#make a wide-format version of d to go directly into bigRR
+#for whatever reason this doesn't work with data.table loaded; restart R at this step
+phenos <- read.csv("output/ModelOutputs/HaLSMeans_062016.csv")
+phenos <- phenos[,c("IsolateID", "Estimate", "Plant")]
+library(tidyr)
+phenos_w <- spread(phenos, "Plant", "Estimate")
+write.csv(phenos_w, "output/ModelOutputs/HaLSM_forbigRR.csv")
