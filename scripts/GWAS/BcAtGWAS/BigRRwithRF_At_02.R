@@ -13,18 +13,18 @@ library(ggplot2)
 library(grid)
 
 #Import data (reorganized from script ReformatBigRRouts.R)
-HEM.plotdata <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_Col0phenos.HEM.PlotFormat.csv")
+HEM.plotdata <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_phenos.HEM.PlotFormat.csv")
 
 HEM.plotdata$Pos <- as.character(HEM.plotdata$Pos)#ensure that position data is not in scientific notation
 HEM.plotdata <- HEM.plotdata[-c(1:2)]
 
 #get threshhold values 
-HEM.thresh <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_Col0phenos.HEM.Thresh.csv")
+HEM.thresh <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_phenos.HEM.Thresh.csv")
 HEM.thresh <- HEM.thresh[,-c(1:2)]
 TH99 <- HEM.thresh[3,]
 TH99_Col0.Cam <- as.numeric(TH99[2])
-TH99_ <- as.numeric(TH99[3])
-TH99_ <- as.numeric(TH99[4])
+TH99_Col0.Les.s <- as.numeric(TH99[3])
+TH99_Col0.AT3G26830 <- as.numeric(TH99[4])
 TH99_ <- as.numeric(TH99[5])
 TH99_ <- as.numeric(TH99[6])
 TH99_ <- as.numeric(TH99[7])
