@@ -2,10 +2,10 @@
 #040516
 #-------------------------------------------------------------
 rm(list=ls())
-setwd("~/Projects/BcEudicotGWAS/data/MetaAnalysis")
+setwd("~/Projects/BcEudicotGWAS/")
 #-------------------------------------------------------------
 #load data
-MyData <- read.csv("FULLMetaDat.csv")
+MyData <- read.csv("data/MetaAnalysis/FULLMetaDat.csv")
 #rename so that Domest is Domesticated vs. Wild vs. landraces
 MyData$Domest[MyData$Domest == 'D'] <- 'Domesticated'
 MyData$Domest[MyData$Domest == 'Dm'] <- 'Domesticated'
@@ -17,11 +17,22 @@ MyData$Domest[MyData$Domest == 'Wl'] <- 'Wild'
 attach(MyData)
 library(ggplot2)
 p <- ggplot(MyData, aes(factor(Taxon), Scale.LS, fill=Domest))
+
+tiff("plots/Eudicots_LesionSize_beanplots.tiff", width=10, height=4, units='in', res=600)
 p + geom_violin(trim=T)+
   ylim(0,5) +
-  theme( axis.title.x = element_blank()) +
+  theme_bw()+
+  theme(text = element_text(size=14), axis.title.x = element_blank(), axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14, angle = 30, hjust = 0.65, vjust = 0.8)) +
+  scale_x_discrete(labels=c("Brassica rapa", "Cichorium endivia", "Cichorium intybus", "Glycine max", "Helianthus annuus", "Solanum spp."))+
   ylab("Scaled Lesion Size")+
- geom_boxplot(width=0.1, position = position_dodge(width = 0.9))
+ geom_boxplot(width=0.1, position = position_dodge(width = 0.9))+
+  labs(fill="")
+dev.off()
+
+
+#get mean lesion size per isolate
+
+
 
 #-------------------------------------------------------------
 ##scatterplot by plant species
