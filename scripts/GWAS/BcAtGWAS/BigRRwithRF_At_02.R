@@ -24,7 +24,6 @@ HEM.thresh <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_phenos.HEM.Thresh.csv")
 HEM.thresh <- HEM.thresh[,-c(1:2)]
 TH99 <- HEM.thresh[3,]
 TH99_Col0.Cam <- as.numeric(TH99[2])
-<<<<<<< HEAD
 TH99_Col0.Les.s <- as.numeric(TH99[3])
 TH99_Col0.AT3G26830 <- as.numeric(TH99[4])
 TH99_ <- as.numeric(TH99[5])
@@ -36,7 +35,6 @@ TH99_ <- as.numeric(TH99[10])
 TH99_ <- as.numeric(TH99[11])
 TH99_ <- as.numeric(TH99[12])
 TH99_ <- as.numeric(TH99[13])
-=======
 TH99_Les.s <- as.numeric(TH99[3])
 TH99_Col0.AT3G26830 <- as.numeric(TH99[4])
 TH99_Col.0AT4G30530 <- as.numeric(TH99[5])
@@ -48,7 +46,6 @@ TH99_npr1.Cam <- as.numeric(TH99[10])
 TH99_npr1.Les.s <- as.numeric(TH99[11])
 TH99_tga3.Cam <- as.numeric(TH99[12])
 TH99_tga3.Les.s <- as.numeric(TH99[13])
->>>>>>> 25b093e17e80db0a31985570d73aa4b59f97f3c1
 
 TH999 <- HEM.thresh[4,]
 TH999_Col0.Cam <- as.numeric(TH999[2])
