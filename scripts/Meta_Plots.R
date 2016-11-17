@@ -31,7 +31,9 @@ dev.off()
 
 
 #get mean lesion size per isolate
-
+library(plyr)
+means <- ddply(MyData, "IsolateID", summarise, meanLS = mean(Scale.LS))
+write.csv(means, "output/MeanLsAllTaxa.csv")
 
 
 #-------------------------------------------------------------
