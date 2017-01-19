@@ -40,10 +40,11 @@ for (i in 2:ncol(TH95)){
 # #Reformat Chromosomes and Positions
 HEM.plotdata$Chrom <- gsub("Chromosome", "", HEM.plotdata$Chrom)
 HEM.plotdata$Chrom <- as.numeric(as.character(HEM.plotdata$Chrom))
+HEM.plotdata$Segment <- as.numeric(as.character(HEM.plotdata$Segment))
 HEM.plotdata$Pos <- as.numeric(as.character(HEM.plotdata$Pos))
 
 #sort dataframe rows in order of Chrom, then Pos
-HEM.plotdata2 <- HEM.plotdata[with(HEM.plotdata, order(Chrom, Pos)), ]
+HEM.plotdata2 <- HEM.plotdata[with(HEM.plotdata, order(Chrom, Segment, Pos)), ]
 
 #Make plotting variables
 HEM.plotdata$Index = NA
@@ -70,16 +71,16 @@ colnames(HEM.plotdata)[16] <- "myIndex"
 #make plots for each phenotype
 #it isn't working with the loop for some reason
 #for (m in 4:15){ #[15]
-  jpeg(paste("05_plots/Gm_LesionSize_MAF20_lowTR_", names(HEM.plotdata[15]), ".ManhattanPlot.jpg", sep=""), width=8, height=4, units='in', res=600)
-  ggplot(HEM.plotdata, aes(x=myIndex, y=abs(HEM.plotdata[15])))+
+  jpeg(paste("05_plots/Gm_LesionSize_MAF20_lowTR_", names(HEM.plotdata[11]), ".ManhattanPlot.jpg", sep=""), width=8, height=4, units='in', res=600)
+  ggplot(HEM.plotdata, aes(x=myIndex, y=abs(HEM.plotdata[11])))+
     theme_bw()+
     geom_point(aes(color = factor(Chrom)))+
-    labs(list(y="SNP Effect Estimate", x="Chromosome position", title=paste("Lesion Size on ", names(HEM.plotdata[15]))))+
+    labs(list(y="SNP Effect Estimate", x="Chromosome position", title=paste("Lesion Size on ", names(HEM.plotdata[11]))))+
     guides(col = guide_legend(nrow = 8, title="Chromosome"))+
-    geom_hline(yintercept=get(paste("TH95_", names(HEM.plotdata[15]), sep="")), colour = "blue") +
-    geom_text(aes(0,get(paste("TH95_", names(HEM.plotdata[15]), sep="")), label = ".95 Threshold", vjust = 1.5, hjust = .05), col = "blue")+
-    geom_hline(yintercept=get(paste("TH99_", names(HEM.plotdata[15]), sep="")), colour = "black") +
-    geom_text(aes(0,get(paste("TH99_", names(HEM.plotdata[15]), sep="")), label = ".99 Threshold", vjust = 1.5, hjust = .05), col = "black")+
+    geom_hline(yintercept=get(paste("TH95_", names(HEM.plotdata[11]), sep="")), colour = "blue") +
+    geom_text(aes(0,get(paste("TH95_", names(HEM.plotdata[11]), sep="")), label = ".95 Threshold", vjust = 1.5, hjust = .05), col = "blue")+
+#    geom_hline(yintercept=get(paste("TH99_", names(HEM.plotdata[11]), sep="")), colour = "black") +
+#    geom_text(aes(0,get(paste("TH99_", names(HEM.plotdata[11]), sep="")), label = ".99 Threshold", vjust = 1.5, hjust = .05), col = "black")+
    expand_limits(y=0)
 dev.off()
 #}
