@@ -42,7 +42,6 @@ for (i in 2:ncol(TH95)){
 
 names(HEM.plotdata)
 
-
 #Col0.Cam: take all over 0.99
 HEM.Col0.Cam <- subset(HEM.plotdata, abs(Col0.Cam) > get(paste("TH99_", "Col0.Cam", sep="")), 
                                 select=c(Chrom,Segment, Pos,Col0.Cam))
@@ -129,4 +128,4 @@ Top200SNP <- rbind(HEM.tga3.Cam, HEM.tga3.Les.s, HEM.npr1.Les.s, HEM.npr1.Cam, H
 Top200SNP$Chrom <- gsub("Chromosome", "", Top200SNP$Chrom)
 Top200SNP$Chrom <- as.numeric(as.character(Top200SNP$Chrom))
 Top200SNP$Pos <- as.numeric(as.character(Top200SNP$Pos))
-write.csv(Top200SNP, "Top200SNPs_BcAtGWAS.csv")
+write.csv(Top200SNP, "Top200SNPs_BcAtGWAS_trueMAF.csv")
