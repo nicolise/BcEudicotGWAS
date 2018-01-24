@@ -8,11 +8,13 @@ library(tidyr)
 setwd("~/Projects/BcEudicotGWAS/data/BcAtGWAS/04_bigRRoutput/")
 #Import data
 #reorganize file Sl_LesionSize.HEM.csv
-HEMdat <- read.csv("At_MAF20_20NA.HEM.csv")
+HEMdat <- read.csv("NA1020_outs/At_MAF20_20NA.HEM.csv")
 
 #first remove first 4 rows (threshold data)
 HEMthresh <- HEMdat[1:8,]
 HEMdat <- HEMdat[-c(1:8),]
+HEMdat <- HEMdat[,-c(1)]
+colnames(HEMdat)[1] <- "outpt.HEM"
 HEMdat2 <- HEMdat
 
 HEMdat$outpt.HEM <- gsub(pattern = "Chromosome1\\.", replacement = "Chromosome1.0.", HEMdat$outpt.HEM)

@@ -15,7 +15,7 @@ library(ggplot2); library(grid); library(plyr)
 HEM.plotdata <- read.csv("04_bigRRoutput/At_LesionSizes_MAF20_NA20.HEM.PlotFormat.csv")
 names(HEM.plotdata)
 HEM.plotdata$Pos <- as.character(HEM.plotdata$Pos)#ensure that position data is not in scientific notation
-HEM.plotdata <- HEM.plotdata[-c(1:2)]
+HEM.plotdata <- HEM.plotdata[,-c(1)]
 
 #get threshhold values 
 HEM.thresh <- read.csv("04_bigRRoutput/At_LesionSize_MAF20_NA20.HEM.Thresh.csv")
@@ -53,27 +53,18 @@ for (i in 2:ncol(TH95neg)){
   assign(paste("TH95neg_", names(TH95neg[i]), sep=""),as.numeric(TH95neg[i]))
 }
 
-
-for (i in 4:10){
+#get all SNPs > 99% Thr
+for (i in 4:7){
   assign(paste("HEMpos.", names(HEM.plotdata[i]), sep=""), subset(HEM.plotdata, HEM.plotdata[i] > get(paste("TH99pos_", names(HEM.plotdata[i]), sep="")), select=c(Chrom,Segment,Pos,i)))
   assign(paste("HEMneg.", names(HEM.plotdata[i]), sep=""), subset(HEM.plotdata, HEM.plotdata[i] < get(paste("TH99neg_", names(HEM.plotdata[i]), sep="")), select=c(Chrom,Segment,Pos,i)))
 }
 
 #for top 500 only
-for (i in 4:10){
+for (i in 4:7){
   assign(paste("HEMpos.", names(HEM.plotdata[i]), sep=""), head(arrange(get(paste("HEMpos.", names(HEM.plotdata[i]), sep="")), desc(get(paste("HEMpos.", names(HEM.plotdata[i]), sep=""))[,4])), n=500))
-}
-for (i in c(4:7,9,10)){
   assign(paste("HEMneg.", names(HEM.plotdata[i]), sep=""), tail(arrange(get(paste("HEMneg.", names(HEM.plotdata[i]), sep="")), desc(get(paste("HEMneg.", names(HEM.plotdata[i]), sep=""))[,4])), n=500))
-}
-
 #combine pos and neg by group
-for (i in 4:10){
   assign(paste("HEM.", names(HEM.plotdata[i]), sep=""), rbind(get(paste("HEMpos.", names(HEM.plotdata[i]), sep="")),get(paste("HEMneg.", names(HEM.plotdata[i]), sep=""))))
-}
-
-#then combine
-for (i in c(4:10)){
   mydf <- paste("HEM.", names(HEM.plotdata[i]), sep="")
   renamedf <- get(mydf)
   colnames(renamedf)[4] <- "Effect"
@@ -82,7 +73,9 @@ for (i in c(4:10)){
   assign(mydf, cbind(get(mydf), Trait = myblob))
 }
 
-HEM.topSNPs <- rbind(HEM.Col0.Les.HEM, HEM.Col0.Cam.HEM, HEM.coi1.Cam.HEM, HEM.anac055.Cam.HEM, HEM.Col0.AT2G30770.HEM, HEM.Col0.AT3G26830.HEM, HEM.Col0.AT4G30530.HEM)
+HEM.topSNPs <- rbind(HEM.Col0.Les, HEM.coi1.Les, HEM.npr1.Les, HEM.pad3.Les)
+
+Top500SNP <- HEM.topSNPs
 
 library(ggplot2)
 plot1 <- ggplot(HEM.topSNPs, aes(x=Pos, y=Effect))

@@ -15,7 +15,7 @@ library(ggplot2); library(grid)
 HEM.plotdata <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_LesionSizes_MAF20_NA20.HEM.PlotFormat.csv")
 
 HEM.plotdata$Pos <- as.character(HEM.plotdata$Pos)#ensure that position data is not in scientific notation
-HEM.plotdata <- HEM.plotdata[,-c(1:2)]
+HEM.plotdata <- HEM.plotdata[,-c(1)]
 
 #get threshhold values 
 HEM.thresh <- read.csv("data/BcAtGWAS/04_bigRRoutput/At_LesionSize_MAF20_NA20.HEM.Thresh.csv")
@@ -113,10 +113,8 @@ colScale <- scale_colour_manual(name = "Chrom",values = myColors)
 
 #make plots for each phenotype
 names(HEM.plotdata)
-#without the loop
-for (i in c(5)){
-  #jpeg(paste("paper/plots/ActualPaper/bw_Sl_LesionSize_trueMAF20_NA10_lowTR_", names(HEM.plotdata[7]), ".ManhattanPlot.jpg", sep=""), width=8, height=5, units='in', res=600)
-  jpeg(paste("plots/At_LesionSize_trueMAF20_NA20_lowTR_", names(HEM.plotdata[i]), ".ManhattanPlot.jpg", sep=""), width=8, height=5, units='in', res=600)
+for (i in c(4:7)){
+ jpeg(paste("plots/At_LesionSize_trueMAF20_NA20_lowTR_", names(HEM.plotdata[i]), ".ManhattanPlot.jpg", sep=""), width=8, height=5, units='in', res=600)
   plot(ggplot(HEM.plotdata, aes(x=Index, y=HEM.plotdata[,i]))+
          theme_bw()+
          colScale+
@@ -143,7 +141,7 @@ for (i in c(5)){
 #with labeling removed for paper
 #jpeg(paste("paper/plots/ActualPaper/FigR5/Routs/pm_BW_Sl_MAF20_highTR_", names(HEM.plotdata[8]), ".ManhattanPlot.jpg", sep=""), width=7.5, height=4, units='in', res=600)
 #4 to 15
-for (i in c(4:10)){
+for (i in c(4:7)){
   jpeg(paste("plots/At_LesionSize_trueMAF20_NA20_hiTR_", names(HEM.plotdata[i]), ".ManhattanPlot.jpg", sep=""), width=8, height=5, units='in', res=600)
   plot(ggplot(HEM.plotdata, aes(x=Index, y=HEM.plotdata[,i]))+
          theme_bw()+
